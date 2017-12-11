@@ -3805,6 +3805,10 @@ class Calculation
             if ($operand > '' && $operand[0] == '"') {
                 $operand = self::unwrapResult($operand);
             }
+            // '3,500 みたいな数字をPHPExcelが扱えないのの対応パッチ
+            if (preg_match('/^[\d,]+$/', $operand)) {
+                $operand = str_replace(',', '', $operand);
+            }
             //    If the string is a numeric value, we treat it as a numeric, so no further testing
             if (!is_numeric($operand)) {
                 //    If not a numeric, test to see if the value is an Excel error, and so can't be used in normal binary operations
