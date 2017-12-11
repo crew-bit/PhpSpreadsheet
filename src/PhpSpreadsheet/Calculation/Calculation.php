@@ -3895,6 +3895,13 @@ class Calculation
 
         $useLowercaseFirstComparison = is_string($operand1) && is_string($operand2) && Functions::getCompatibilityMode() == Functions::COMPATIBILITY_OPENOFFICE;
 
+        // IF(A1=''...) がExcelではtrueだけど、PHPExcelだとfalseになる問題用パッチ
+        if (in_array($operand1, ['', 0, null], true) && in_array($operand2, ['', 0, null], true)) {
+            if ($operand1 !== $operand2 && (is_numeric($operand1) || is_numeric($operand2))) {
+                $operand1 = $operand2 = 0;
+            }
+        }
+
         //    execute the necessary operation
         switch ($operation) {
             //    Greater than
