@@ -797,17 +797,27 @@ class LookupRef
         $returnColumn = $firstkey + $index_number;
         $firstColumn = array_shift($f);
 
-        if (!$not_exact_match) {
-            $firstRowH = asort($lookup_array[$firstColumn]);
-        }
+        // [ABC, aaa, ...] みたいな $lookup_array の時に aaa で検索できないのを修正するパッチ
+        // if (!$not_exact_match) {
+        //     $firstRowH = asort($lookup_array[$firstColumn]);
+        // }
         $rowNumber = $rowValue = false;
-        foreach ($lookup_array[$firstColumn] as $rowKey => $rowData) {
-            if ((is_numeric($lookup_value) && is_numeric($rowData) && ($rowData > $lookup_value)) ||
-                (!is_numeric($lookup_value) && !is_numeric($rowData) && (strtolower($rowData) > strtolower($lookup_value)))) {
-                break;
+        if (!$not_exact_match) {
+            foreach ($lookup_array[$firstColumn] as $rowKey => $rowData) {
+                if ((is_numeric($lookup_value) && is_numeric($rowData) && ($rowData == $lookup_value)) ||
+                    (!is_numeric($lookup_value) && !is_numeric($rowData) && (strtolower($rowData) == strtolower($lookup_value)))) {
+                    return $lookup_array[$returnColumn][$rowKey];
+                }
             }
-            $rowNumber = $rowKey;
-            $rowValue = $rowData;
+        } else {
+            foreach ($lookup_array[$firstColumn] as $rowKey => $rowData) {
+                if ((is_numeric($lookup_value) && is_numeric($rowData) && ($rowData > $lookup_value)) ||
+                    (!is_numeric($lookup_value) && !is_numeric($rowData) && (strtolower($rowData) > strtolower($lookup_value)))) {
+                    break;
+                }
+                $rowNumber = $rowKey;
+                $rowValue  = $rowData;
+            }
         }
 
         if ($rowNumber !== false) {
