@@ -1119,6 +1119,8 @@ class Statistical
     {
         $returnValue = 0;
 
+        $origCondition = $condition;
+
         $aArgs = Functions::flattenArray($aArgs);
         $condition = Functions::ifCondition($condition);
         // Loop through arguments
@@ -1126,10 +1128,18 @@ class Statistical
             if (!is_numeric($arg)) {
                 $arg = Calculation::wrapResult(strtoupper($arg));
             }
-            $testCondition = '=' . $arg . $condition;
-            if (Calculation::getInstance()->_calculateFormulaValue($testCondition)) {
-                // Is it a value within our criteria
-                ++$returnValue;
+
+            if ($condition[0] === "=" && !is_numeric($origCondition) && preg_match('/[*?]/', $condition)) {
+                $pattern = '/' . str_replace(['*', '?', '/'], ['.*', '.', '\/'], $origCondition) . '/';
+                if (preg_match($pattern, $arg)) {
+                    ++$returnValue;
+                }
+            } else {
+                $testCondition = '=' . $arg . $condition;
+                if (Calculation::getInstance()->_calculateFormulaValue($testCondition)) {
+                    // Is it a value within our criteria
+                    ++$returnValue;
+                }
             }
         }
 
