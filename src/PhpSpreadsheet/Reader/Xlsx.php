@@ -1430,8 +1430,12 @@ class Xlsx extends BaseReader
                                         );
                                         $vmlRelationship = '';
 
+                                        // legacyDrawingHF(HeaderFooter) 以外の vmlDrawing がある時かつ、
+                                        // legacyDrawingHF で画像を使っておらず、別の vmlDrawing で画像を使っている時、
+                                        // 存在しない legacyDrawingHF の _rels を参照しようとして落ちる不具合？の対策。
+                                        $_relId = (string) $xmlSheet->legacyDrawingHF->xpath('@r:id')[0]['id'];
                                         foreach ($relsWorksheet->Relationship as $ele) {
-                                            if ($ele['Type'] == 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/vmlDrawing') {
+                                            if ($ele['Id'] == $_relId && $ele['Type'] == 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/vmlDrawing') {
                                                 $vmlRelationship = self::dirAdd("$dir/$fileWorksheet", $ele['Target']);
                                             }
                                         }
